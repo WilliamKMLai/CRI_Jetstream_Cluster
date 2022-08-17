@@ -164,6 +164,15 @@
       line:  "{{ headnode_private_ip.stdout }}:/opt/ohpc/pub  /opt/ohpc/pub  nfs  defaults,nfsvers=4.0 0 0"
       state: present
 
+  - name: ensure /mnt/pulsar exists
+    file: path=/mnt/pulsar state=directory mode=777
+
+  - name: import /mnt/pulsar on compute nodes
+    lineinfile:
+      dest: /etc/fstab
+      line:  "{{ headnode_private_ip.stdout }}:/mnt/pulsar  /mnt/pulsar nfs  defaults,nfsvers=4.0 0 0"
+      state: present
+
   - name: ensure /export exists
     file: path=/export state=directory mode=777
 
@@ -193,12 +202,12 @@
       use_ssh_args: yes
 
   - name: fix perms on munge key
-    file: 
+    file:
       path: /etc/munge/munge.key
       owner: munge
       group: munge
       mode: 0600
- 
+
   - name: copy slurm.conf from headnode
     synchronize:
       mode: push
@@ -206,7 +215,7 @@
       dest: /etc/slurm/slurm.conf
       set_remote_user: no
       use_ssh_args: yes
- 
+
   - name: copy slurm_prolog.sh from headnode
     synchronize:
       mode: push
@@ -214,10 +223,10 @@
       dest: /usr/local/sbin/slurm_prolog.sh
       set_remote_user: no
       use_ssh_args: yes
- 
+
   - name: enable munge
-    service: name=munge.service enabled=yes 
- 
+    service: name=munge.service enabled=yes
+
   - name: enable slurmd
     service: name=slurmd enabled=yes
 
@@ -261,7 +270,7 @@
 
   - name: create compute instance snapshot
     command: ./compute_take_snapshot.sh
-      
+
 # os_server no longer handles instance state correctly
 #  - name: remove compute instance
 #    os_server:
